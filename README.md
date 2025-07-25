@@ -27,19 +27,43 @@ git clone https://github.com/Singh-Ish/slideme-converter.git
 cd slideme-converter
 ```
 
-2. Install dependencies:
+2. Create and activate a Python virtual environment:
+
+**On macOS/Linux:**
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+**On Windows:**
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+3. Install dependencies:
 
 ```bash
 pip install streamlit
 ```
 
-3. Run the application:
+4. Run the application:
 
 ```bash
 streamlit run app.py
 ```
 
-4. Open your browser and navigate to `http://localhost:8501`
+5. Open your browser and navigate to `http://localhost:8501`
+
+### Deactivating the Environment
+
+When you're done using the application, you can deactivate the virtual environment:
+
+```bash
+deactivate
+```
 
 ## 📖 How to Use
 
