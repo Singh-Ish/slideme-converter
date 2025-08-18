@@ -141,40 +141,57 @@ st.title("🎛️ Slideme Shortcode to Gutenberg Block Converter")
 # Create tabs for different input methods
 tab1, tab2 = st.tabs(["📁 Upload File", "📝 Paste Text"])
 
-content = None
+# Use session state to track content dynamically
+if 'content' not in st.session_state:
+    st.session_state.content = ""
+
+def update_content_from_file():
+    uploaded_file = st.session_state.uploaded_file
+    if uploaded_file:
+        st.session_state.content = uploaded_file.read().decode("utf-8")
+        st.success(f"✅ File uploaded successfully! ({len(st.session_state.content)} characters)")
+
+def update_content_from_text():
+    st.session_state.content = st.session_state.text_input
+    st.success(f"✅ Text input detected! ({len(st.session_state.content)} characters)")
 
 with tab1:
-    uploaded_file = st.file_uploader("Upload a file with [slideme] shortcodes", type=["txt", "html", "md"])
-    if uploaded_file:
-        content = uploaded_file.read().decode("utf-8")
-        st.success(f"✅ File uploaded successfully! ({len(content)} characters)")
+    st.file_uploader(
+        "Upload a file with [slideme] shortcodes", 
+        type=["txt", "html", "md"], 
+        key="uploaded_file", 
+        on_change=update_content_from_file
+    )
 
 with tab2:
-    text_input = st.text_area(
+    st.text_area(
         "Paste your content with [slideme] shortcodes here:",
         height=200,
-        placeholder="Paste your content containing [slideme title=\"Your Title\"]Your content here[/slideme] shortcodes..."
+        placeholder="Paste your content containing [slideme title=\"Your Title\"]Your content here[/slideme] shortcodes...",
+        key="text_input",
+        on_change=update_content_from_text
     )
-    if text_input.strip():
-        content = text_input
-        st.success(f"✅ Text input detected! ({len(content)} characters)")
 
-# Show convert button only if content is available
-if content:
-    st.divider()
-    
-    # Convert button
-    if st.button("🔄 Convert to Gutenberg Blocks", type="primary", use_container_width=True):
-        with st.spinner("Converting your content..."):
-            converted = convert_slideme_to_gutenberg(content)
-            
-            if converted.strip():
-                # Store in session state to persist the result
-                st.session_state.converted_content = converted
-                st.session_state.show_results = True
-            else:
-                st.session_state.show_results = False
-                st.warning("⚠️ No [slideme] shortcodes found in the provided content.")
+# Convert button always visible and dynamically enabled/disabled
+st.divider()
+convert_button = st.button(
+    "🔄 Convert to Gutenberg Blocks",
+    type="primary",
+    use_container_width=True,
+    disabled=not bool(st.session_state.content)
+)
+
+if convert_button:
+    with st.spinner("Converting your content..."):
+        converted = convert_slideme_to_gutenberg(st.session_state.content)
+        
+        if converted.strip():
+            # Store in session state to persist the result
+            st.session_state.converted_content = converted
+            st.session_state.show_results = True
+        else:
+            st.session_state.show_results = False
+            st.warning("⚠️ No [slideme] shortcodes found in the provided content.")
 
 # Display results if available
 if hasattr(st.session_state, 'show_results') and st.session_state.show_results:
